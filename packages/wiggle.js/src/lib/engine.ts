@@ -7,7 +7,7 @@ export interface WiggleFiber {
     child?: WiggleFiber;
     key?: string;
     type?: 'TEXT_ELEMENT' | WiggleHTMLTags;
-    props?: {children?: WiggleFiber[]; value?: string};
+    props?: {children?: WiggleFiber[]; [_: string]: any};
 }
 
 interface IRenderEngineProps extends WiggleFiber {}
@@ -28,38 +28,17 @@ export default class RenderEngine {
         requestIdleCallback(this.workLoop);
     };
 
+    /**
+     * Create a DOM node for each fiber. Append the node to the DOM if it has a parent.
+     */
     performUnitOfWork(fiber: WiggleFiber) {
-        if (!fiber.dom) {
-            fiber.dom = this.createDom(fiber);
-        }
+        if (!fiber.dom) fiber.dom = this.createDom(fiber);
+        if (fiber.parent) fiber.parent.dom!.appendChild(fiber.dom!);
 
-        if (fiber.parent) {
-            fiber.parent.dom!.appendChild(fiber.dom!);
-        }
+        this.performWhileLoop(fiber, fiber.props?.children || [], {});
 
-        const elements = fiber.props?.children || [];
-        let index = 0;
-        let prevSibling: WiggleFiber = {};
-        while (index < elements.length) {
-            const element = elements[index];
-            const newFiber = {
-                type: element.type,
-                props: element.props,
-                parent: fiber,
-                dom: null,
-            } as WiggleFiber;
-            if (index === 0) {
-                fiber.child = newFiber;
-            } else {
-                prevSibling.sibling = newFiber;
-            }
-            prevSibling = newFiber;
-            index++;
-        }
+        if (fiber.child) return fiber.child;
 
-        if (fiber.child) {
-            return fiber.child;
-        }
         let nextFiber = fiber;
         while (nextFiber) {
             if (nextFiber.sibling) return nextFiber.sibling;
@@ -67,13 +46,38 @@ export default class RenderEngine {
         }
     }
 
+    /**
+     * Create a fiber for each child element
+     */
+    performWhileLoop(fiber: WiggleFiber, elements: WiggleFiber[], prevSibling: WiggleFiber) {
+        let index = 0;
+        while (index < elements.length) {
+            const element = elements[index];
+            const newFiber = {
+                ...element,
+                parent: fiber,
+            };
+
+            if (index === 0) fiber.child = newFiber;
+            else prevSibling.sibling = newFiber;
+            prevSibling = newFiber;
+            index++;
+        }
+    }
+
+    renderTextNode(fiber: WiggleFiber) {
+        return document.createTextNode(fiber.props?.value || '');
+    }
+
+    renderHtmlNode(fiber: WiggleFiber) {
+        const element = document.createElement(fiber.type!);
+        return element;
+    }
+
     createDom(fiber: WiggleFiber) {
         if (!fiber.type) return;
-        const domEl =
-            fiber.type === 'TEXT_ELEMENT'
-                ? document.createTextNode(fiber.props?.value || '')
-                : document.createElement(fiber.type);
+        const renderFn = fiber.type === 'TEXT_ELEMENT' ? this.renderTextNode : this.renderHtmlNode;
 
-        return domEl;
+        return renderFn(fiber);
     }
 }
