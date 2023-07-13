@@ -1,0 +1,16 @@
+{
+    "include": ["./src"],
+    "compilerOptions": {
+        "target": "es2016",
+        "module": "commonjs",
+        "outDir": "dist",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "jsx": "react",
+        "jsxFactory": "WiggleJs",
+        "forceConsistentCasingInFileNames": true,
+        "allowSyntheticDefaultImports": false,
+        "declaration": true
+    }
+}

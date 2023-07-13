@@ -1,0 +1,14 @@
+{
+    "include": ["./src"],
+    "compilerOptions": {
+        "target": "es2016",
+        "module": "ESNext",
+        "outDir": "dist",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "allowSyntheticDefaultImports": true,
+        "declaration": true
+    }
+}

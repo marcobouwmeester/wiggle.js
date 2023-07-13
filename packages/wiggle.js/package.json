@@ -1,0 +1,16 @@
+{
+    "name": "wiggle.js",
+    "version": "1.0.0",
+    "description": "Wiggle.js - another javascript framework",
+    "main": "dist/index.js",
+    "scripts": {
+        "lint": "tsc --noEmit",
+        "dev": "tsc --watch"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "typescript": "5.1.6"
+    }
+}
